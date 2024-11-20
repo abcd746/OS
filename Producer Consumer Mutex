@@ -1,0 +1,72 @@
+#include <stdio.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <stdlib.h>  // Include for rand()
+
+#define BUFFER_SIZE 5
+#define NUM_ITEMS 10  // Number of items to produce/consume
+
+int buffer[BUFFER_SIZE];
+int count = 0;  // Tracks the number of items in the buffer
+pthread_mutex_t mutex;  // Mutex to protect shared buffer
+
+void *producer(void *param) {
+    int item;
+    for (int i = 0; i < NUM_ITEMS; i++) {  // Produce only 10 items
+        sleep(1);
+        item = rand() % 100;  // Generate a random item
+        
+        // Critical section
+        pthread_mutex_lock(&mutex);  // Lock the mutex before accessing the buffer
+
+        if (count < BUFFER_SIZE) {  // Only produce if buffer is not full
+            buffer[count++] = item;
+            printf("Producer produced: %d\n", item);
+        } else {
+            printf("Buffer is full, producer is waiting...\n");
+        }
+
+        pthread_mutex_unlock(&mutex);  // Unlock the mutex after producing the item
+    }
+    return NULL;
+}
+
+void *consumer(void *param) {
+    int item;
+    for (int i = 0; i < NUM_ITEMS; i++) {  // Consume only 10 items
+        sleep(1);
+        
+        // Critical section
+        pthread_mutex_lock(&mutex);  // Lock the mutex before accessing the buffer
+
+        if (count > 0) {  // Only consume if buffer is not empty
+            item = buffer[--count];
+            printf("Consumer consumed: %d\n", item);
+        } else {
+            printf("Buffer is empty, consumer is waiting...\n");
+        }
+
+        pthread_mutex_unlock(&mutex);  // Unlock the mutex after consuming the item
+    }
+    return NULL;
+}
+
+int main() {
+    pthread_t prod, cons;
+    
+    // Initialize the mutex
+    pthread_mutex_init(&mutex, NULL);
+
+    // Create producer and consumer threads
+    pthread_create(&prod, NULL, producer, NULL);
+    pthread_create(&cons, NULL, consumer, NULL);
+
+    // Wait for both threads to finish
+    pthread_join(prod, NULL);
+    pthread_join(cons, NULL);
+
+    // Destroy the mutex
+    pthread_mutex_destroy(&mutex);
+
+    return 0;
+}
