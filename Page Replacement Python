@@ -1,0 +1,58 @@
+def fifo_page_replacement(pages, capacity):
+    memory = []
+    page_faults = 0
+    for page in pages:
+        if page not in memory:
+            if len(memory) < capacity:
+                memory.append(page)
+            else:
+                memory.pop(0)  # Remove the first page (FIFO)
+                memory.append(page)  # Add the new page
+            page_faults += 1  # Increment the page fault count
+            print(f"memory :", memory)
+    return page_faults  # Return the total page faults
+
+def lru_page_replacement(pages, capacity):
+    memory = []
+    page_faults = 0
+    page_index = {}
+    for i, page in enumerate(pages):
+        if page not in memory:
+            if len(memory) < capacity:
+                memory.append(page)
+            else:
+                lru_page = min(memory, key=lambda x: page_index[x])  # Find the least recently used page
+                memory.remove(lru_page)
+                memory.append(page)
+            page_index[page] = i  # Update the index of the current page
+            page_faults += 1  # Increment the page fault count
+            print(f"Memory :", memory)
+    return page_faults  # Return the total page faults
+
+def optimal_page_replacement(pages, capacity):
+    memory = []
+    page_faults = 0
+    for i, page in enumerate(pages):
+        if page not in memory:
+            if len(memory) < capacity:
+                memory.append(page)
+            else:
+                future_indices = []
+                for mem_page in memory:
+                    try:
+                        future_indices.append(pages[i+1:].index(mem_page))
+                    except ValueError:
+                        future_indices.append(float('inf'))  # If the page is not found
+                replace_index = future_indices.index(max(future_indices))  # Find the page to replace
+                memory[replace_index] = page  # Replace the page
+            page_faults += 1  # Increment the page fault count
+            print(f"memory :", memory)
+    return page_faults  # Return the total page faults
+
+# Test the functions
+pages = [7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2]
+capacity = 3
+
+print(f"FIFO page faults :", fifo_page_replacement(pages, capacity))
+print(f"LRU page faults :", lru_page_replacement(pages, capacity))
+print(f"Optimal page faults :", optimal_page_replacement(pages, capacity))
