@@ -1,0 +1,89 @@
+#include <stdio.h>
+#include <stdbool.h>
+
+#define P 5 // Number of processes
+#define R 3 // Number of resources
+
+int main() {
+    // Inputs: Allocation, Maximum, and Available resources
+    int allocation[P][R] = {
+        {0, 1, 0},
+        {2, 0, 0},
+        {3, 0, 2},
+        {2, 1, 1},
+        {0, 0, 2}
+    };
+
+    int max[P][R] = {
+        {7, 5, 3},
+        {3, 2, 2},
+        {9, 0, 2},
+        {2, 2, 2},
+        {4, 3, 3}
+    };
+
+    int available[R] = {10, 5, 7};
+
+    int need[P][R]; // To store the Need matrix
+    bool finished[P] = {false}; // To track completed processes
+    int safeSequence[P]; // To store the safe sequence
+
+    // Step 1: Calculate the Need matrix
+    for (int i = 0; i < P; i++) {
+        for (int j = 0; j < R; j++) {
+            need[i][j] = max[i][j] - allocation[i][j];
+        }
+    }
+
+    // Step 2: Find a safe sequence
+    int count = 0; // Number of processes in the safe sequence
+    while (count < P) {
+        bool found = false;
+
+        for (int i = 0; i < P; i++) {
+            if (!finished[i]) { // Check if the process is not finished
+                bool canAllocate = true;
+
+                // Check if resources can be allocated to process i
+                for (int j = 0; j < R; j++) {
+                    if (need[i][j] > available[j]) {
+                        canAllocate = false;
+                        break;
+                    }
+                }
+
+                if (canAllocate) {
+                    // Allocate resources to process i
+                    for (int j = 0; j < R; j++) {
+                        available[j] += allocation[i][j];
+                    }
+
+                    safeSequence[count++] = i; // Add process to the safe sequence
+                    finished[i] = true; // Mark process as finished
+                    found = true;
+
+                    // Print the available resources after allocation
+                    printf("Available resources after allocating to P%d: ", i);
+                    for (int j = 0; j < R; j++) {
+                        printf("%d ", available[j]);
+                    }
+                    printf("\n");
+                }
+            }
+        }
+
+        if (!found) { // No process can proceed, system is not safe
+            printf("The system is not in a safe state.\n");
+            return 0;
+        }
+    }
+
+    // Step 3: Print the safe sequence
+    printf("The system is in a safe state.\nSafe sequence is: ");
+    for (int i = 0; i < P; i++) {
+        printf("P%d ", safeSequence[i]);
+    }
+    printf("\n");
+
+    return 0;
+}
