@@ -1,0 +1,33 @@
+Example.txt- 
+Empno:Name:Basic salary
+
+101:John:40000
+
+102:Jane:35000
+
+103:Alice:45000
+
+generate_report.awk-
+BEGIN {
+    # Print the report header
+    printf "%-10s %-10s %-10s %-10s %-10s %-10s\n", "Roll No.", "Name", "BS", "DA", "HRA", "GS";
+}
+{
+    # Split the input line into fields using ":" as a delimiter
+    split($0, fields, ":");
+    
+    # Extract fields
+    empno = fields[1];
+    name = fields[2];
+    bs = fields[3];
+    
+    # Calculate DA, HRA, and GS
+    da = 0.5 * bs;
+    hra = 0.2 * bs;
+    gs = bs + da + hra;
+
+    # Print the calculated values in the report format
+    printf "%-10s %-10s %-10.2f %-10.2f %-10.2f %-10.2f\n", empno, name, bs, da, hra, gs;
+}
+
+To run: awk -f generate_report.awk employee_data.txt
