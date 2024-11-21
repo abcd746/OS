@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# Prompt user for the main string
+echo "Enter the main string:"
+read main_string
+
+# Prompt user for the substring
+echo "Enter the substring to search:"
+read substring
+
+# Check if the substring exists in the main string
+if [[ "$main_string" == *"$substring"* ]]; then
+    echo "The substring '$substring' is present in the main string."
+
+    # Find occurrences and positions
+    count=0
+    pos=0
+    while [[ $pos -lt ${#main_string} ]]; do
+        pos=$(expr index "${main_string:$pos}" "$substring")
+        if [[ $pos -gt 0 ]]; then
+            count=$((count + 1))
+            echo "Occurrence $count found at position $((pos + count - 1))"
+            pos=$((pos + ${#substring}))
+        else
+            break
+        fi
+    done
+    echo "Total occurrences: $count"
+else
+    echo "The substring '$substring' is not present in the main string."
+Fi
